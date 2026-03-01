@@ -358,6 +358,103 @@ body {
   margin-top: 4px;
 }
 
+/* ── STREAK & HISTORY ── */
+.streak-block {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.streak-number {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+.streak-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.history-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+
+.history-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 32px;
+}
+.history-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ring);
+}
+.history-dot.done {
+  background: var(--accent);
+}
+.history-dot.today {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+}
+
+/* Home streak row */
+.home-streak {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--ring);
+  padding-top: 16px;
+  margin-bottom: 32px;
+}
+.home-streak-num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.home-streak-text {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.home-history-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 24px;
+}
+.home-history-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ring);
+}
+.home-history-dot.done { background: var(--accent); }
+.home-history-dot.today {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+}
+
+/* ── COMPLETE screen additions ── */
+.complete-divider {
+  width: 40px;
+  height: 1px;
+  background: var(--ring);
+}
+.complete-history {
+  width: 100%;
+  text-align: left;
+}
+
 /* Fade transition */
 .fade-in {
   animation: fadeIn 0.4s ease both;
@@ -387,7 +484,12 @@ body {
     <li><span class="num">05</span><span class="name">Standing Hip Circles</span><span class="detail">10 × 2 dir</span></li>
     <li><span class="num">06</span><span class="name">Doorway Chest Opener</span><span class="detail">30s × 2</span></li>
   </ul>
-  <button class="start-btn" onclick="startSession()">Begin Routine →</button>
+
+  <div id="homeStreakRow" class="home-streak"></div>
+  <div id="homeHistoryDots" class="home-history-dots"></div>
+
+<button class="start-btn" onclick="startSession()">Begin Routine →</button>
+
 </section>
 
 <!-- SESSION -->
@@ -449,6 +551,15 @@ body {
   <div>
     <div class="complete-time" id="completeTime">0:00</div>
     <div class="complete-time-label">Total time</div>
+  </div>
+  <div class="complete-divider"></div>
+  <div class="complete-history">
+    <div class="streak-block">
+      <span class="streak-number" id="completeStreakNum">1</span>
+      <span class="streak-label" id="completeStreakLabel">day streak 🔥</span>
+    </div>
+    <p class="history-label">Last 30 days</p>
+    <div class="history-dots" id="completeHistoryDots"></div>
   </div>
   <button class="start-btn" onclick="goHome()">Back to Home</button>
 </section>
@@ -599,6 +710,88 @@ function setRing(fraction) {
   document.getElementById('ringFill').style.strokeDashoffset = offset;
 }
 
+// ── HISTORY & STREAK ──────────────────────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('stretch-history') || '[]'); }
+  catch(e) { return []; }
+}
+
+function recordToday() {
+  const key = todayKey();
+  const history = getHistory();
+  if (!history.includes(key)) {
+    history.push(key);
+    // Keep only last 30 unique days
+    history.sort();
+    if (history.length > 30) history.splice(0, history.length - 30);
+    localStorage.setItem('stretch-history', JSON.stringify(history));
+  }
+}
+
+function calcStreak(history) {
+  if (!history.length) return 0;
+  const sorted = [...history].sort().reverse(); // newest first
+  const today = todayKey();
+  // Accept streak ending today or yesterday (grace period)
+  const todayDate = new Date();
+  let streak = 0;
+  let cursor = new Date();
+  // Start from today; if today not done yet, start from yesterday
+  if (!history.includes(today)) cursor.setDate(cursor.getDate() - 1);
+
+  while (true) {
+    const key = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
+    if (history.includes(key)) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function renderHistoryDots(containerId, dotClass) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  const history = getHistory();
+  const today = todayKey();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const dot = document.createElement('div');
+    let cls = dotClass;
+    if (history.includes(key)) cls += ' done';
+    if (key === today) cls += ' today';
+    dot.className = cls;
+    container.appendChild(dot);
+  }
+}
+
+function renderHomeStreak() {
+  const history = getHistory();
+  const streak = calcStreak(history);
+  const row = document.getElementById('homeStreakRow');
+  if (streak > 0) {
+    row.innerHTML = `
+      <span class="home-streak-num">${streak}</span>
+      <span class="home-streak-text">day streak 🔥<br><span style="font-size:10px;opacity:0.7">Keep it going</span></span>
+    `;
+    row.style.display = 'flex';
+  } else {
+    row.innerHTML = `<span class="home-streak-text" style="color:var(--ink-soft);font-size:11px">No streak yet — start today.</span>`;
+    row.style.display = 'flex';
+  }
+  renderHistoryDots('homeHistoryDots', 'home-history-dot');
+}
+
 // ── SESSION LOGIC ─────────────────────────────────────────────────────────────
 function startSession() {
   currentIndex = 0;
@@ -690,15 +883,22 @@ function togglePause() {
 
 function finishSession() {
   clearInterval(timerInterval);
+  recordToday();
+  const history = getHistory();
+  const streak = calcStreak(history);
   const elapsed = Math.round((Date.now() - sessionStart) / 1000);
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
   document.getElementById('completeTime').textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+  document.getElementById('completeStreakNum').textContent = streak;
+  document.getElementById('completeStreakLabel').textContent = streak === 1 ? 'day streak — nice start!' : `day streak 🔥`;
+  renderHistoryDots('completeHistoryDots', 'history-dot');
   show('complete');
 }
 
 function goHome() {
   clearInterval(timerInterval);
+  renderHomeStreak();
   show('home');
 }
 
@@ -708,6 +908,9 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
+
+// Init home streak on first load
+renderHomeStreak();
 </script>
 
 </body>
