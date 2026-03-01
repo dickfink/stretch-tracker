@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Morning Stretch</title>
+  <meta name="description" content="Your morning stretch routine — guided, timed, offline-ready.">
+  <meta name="theme-color" content="#f5f0e8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Stretch">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f0e8;
+      --surface: #ede7d9;
+      --ink: #1a1612;
+      --ink-soft: #6b6057;
+      --accent: #c1440e;
+      --accent-light: #e8956d;
+      --ring: #d4c4a8;
+      --green: #3a6b4a;
+    }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* ── SCREENS ── */
+.screen { display: none; flex-direction: column; flex: 1; }
+.screen.active { display: flex; }
+
+/* ── HOME ── */
+#home {
+  justify-content: space-between;
+  padding: 48px 32px 56px;
+}
+
+.home-header { padding-top: 8px; }
+.home-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+.home-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(42px, 11vw, 68px);
+  line-height: 1.05;
+  font-weight: 700;
+}
+.home-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.routine-list {
+  list-style: none;
+  border-top: 1px solid var(--ring);
+  margin: 40px 0;
+  flex: 1;
+}
+.routine-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ring);
+  font-size: 13px;
+}
+.routine-list .num {
+  font-size: 10px;
+  color: var(--ink-soft);
+  min-width: 20px;
+}
+.routine-list .name { flex: 1; }
+.routine-list .detail { color: var(--ink-soft); font-size: 11px; }
+
+.start-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.start-btn:active { background: #a3360a; transform: scale(0.98); }
+
+/* ── SESSION ── */
+#session {
+  position: relative;
+  justify-content: space-between;
+  padding: 0 0 env(safe-area-inset-bottom, 24px);
+}
+
+/* Progress bar */
+.progress-bar-track {
+  height: 3px;
+  background: var(--ring);
+  position: relative;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+/* Step dots */
+.step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 32px 0;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ring);
+  transition: background 0.3s, transform 0.3s;
+}
+.dot.done { background: var(--accent-light); }
+.dot.active { background: var(--accent); transform: scale(1.4); }
+
+/* Main content */
+.session-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 32px 32px 24px;
+}
+
+.stretch-meta {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+.stretch-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(28px, 8vw, 44px);
+  line-height: 1.1;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stretch-side {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  color: var(--accent);
+  font-size: clamp(18px, 5vw, 26px);
+  margin-bottom: 24px;
+  min-height: 32px;
+}
+
+.stretch-instructions {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  border-left: 2px solid var(--ring);
+  padding-left: 16px;
+  margin-bottom: 32px;
+}
+
+/* Timer ring */
+.timer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.timer-ring-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+.timer-ring-wrap svg {
+  transform: rotate(-90deg);
+}
+.ring-bg { stroke: var(--ring); fill: none; }
+.ring-fill {
+  stroke: var(--accent);
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s linear;
+}
+.timer-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.timer-seconds {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+}
+.timer-unit {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+/* Rep counter */
+.rep-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.rep-count {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 80px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+.rep-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 6px;
+}
+
+/* Buttons */
+.btn-row {
+  display: flex;
+  gap: 12px;
+  padding: 0 32px 32px;
+}
+
+.btn-main {
+  flex: 1;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 20px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-main:active { background: #a3360a; transform: scale(0.98); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--ring);
+  border-radius: 4px;
+  padding: 20px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-secondary:active { background: var(--surface); }
+
+.btn-pause {
+  background: var(--surface);
+  color: var(--ink);
+  border: none;
+  border-radius: 4px;
+  padding: 20px 24px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── COMPLETE ── */
+#complete {
+  justify-content: center;
+  align-items: center;
+  padding: 48px 32px 56px;
+  text-align: center;
+  gap: 24px;
+}
+
+.complete-icon {
+  font-size: 56px;
+  line-height: 1;
+}
+
+.complete-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(32px, 9vw, 52px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.complete-title em {
+  font-style: italic;
+  color: var(--green);
+}
+
+.complete-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  max-width: 280px;
+}
+
+.complete-time {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.complete-time-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+/* Fade transition */
+.fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+  </style>
+</head>
+<body>
+
+<!-- HOME -->
+
+<section id="home" class="screen active">
+  <div class="home-header">
+    <p class="home-eyebrow">Daily Practice</p>
+    <h1 class="home-title">Morning<br><em>Stretch</em></h1>
+  </div>
+  <ul class="routine-list">
+    <li><span class="num">01</span><span class="name">90/90 Hip Stretch</span><span class="detail">60s × 2</span></li>
+    <li><span class="num">02</span><span class="name">World's Greatest Stretch</span><span class="detail">5 reps × 2</span></li>
+    <li><span class="num">03</span><span class="name">Cat-Cow</span><span class="detail">10 reps</span></li>
+    <li><span class="num">04</span><span class="name">Thoracic Rotation</span><span class="detail">8 reps × 2</span></li>
+    <li><span class="num">05</span><span class="name">Standing Hip Circles</span><span class="detail">10 × 2 dir</span></li>
+    <li><span class="num">06</span><span class="name">Doorway Chest Opener</span><span class="detail">30s × 2</span></li>
+  </ul>
+  <button class="start-btn" onclick="startSession()">Begin Routine →</button>
+</section>
+
+<!-- SESSION -->
+
+<section id="session" class="screen">
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" id="progressFill"></div>
+  </div>
+
+  <div class="step-dots" id="stepDots"></div>
+
+  <div class="session-content fade-in" id="sessionContent">
+    <p class="stretch-meta" id="metaText"></p>
+    <h2 class="stretch-name" id="stretchName"></h2>
+    <p class="stretch-side" id="stretchSide"></p>
+    <p class="stretch-instructions" id="stretchInstructions"></p>
+
+```
+<!-- Timer (timed) -->
+<div class="timer-container" id="timerContainer">
+  <div class="timer-ring-wrap">
+    <svg width="160" height="160" viewBox="0 0 160 160">
+      <circle class="ring-bg" cx="80" cy="80" r="70" stroke-width="6"/>
+      <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="70" stroke-width="6"
+        stroke-dasharray="439.82"
+        stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-label">
+      <span class="timer-seconds" id="timerSeconds">60</span>
+      <span class="timer-unit">sec</span>
+    </div>
+  </div>
+</div>
+
+<!-- Rep counter (rep-based) -->
+<div class="rep-container" id="repContainer" style="display:none">
+  <span class="rep-count" id="repCount">0</span>
+  <span class="rep-label" id="repLabel">of 10 reps</span>
+</div>
+```
+
+  </div>
+
+  <div class="btn-row" id="btnRow">
+    <button class="btn-secondary" onclick="skipBack()">← Back</button>
+    <button class="btn-main" id="mainBtn" onclick="handleMain()">Next →</button>
+    <button class="btn-pause" id="pauseBtn" onclick="togglePause()">⏸</button>
+  </div>
+</section>
+
+<!-- COMPLETE -->
+
+<section id="complete" class="screen">
+  <div class="complete-icon">🌿</div>
+  <div>
+    <h2 class="complete-title">All <em>Done.</em></h2>
+  </div>
+  <p class="complete-sub">Great work. Your body thanks you. See you tomorrow.</p>
+  <div>
+    <div class="complete-time" id="completeTime">0:00</div>
+    <div class="complete-time-label">Total time</div>
+  </div>
+  <button class="start-btn" onclick="goHome()">Back to Home</button>
+</section>
+
+<script>
+// ── STRETCH DATA ──────────────────────────────────────────────────────────────
+const STEPS = [
+  {
+    name: "90/90 Hip Stretch",
+    type: "timer",
+    duration: 60,
+    sides: ["Left side", "Right side"],
+    instructions: "Sit with front leg at 90° and back leg at 90°. Keep your spine tall. Let gravity sink your hips toward the floor. Breathe slowly and relax into the position.",
+  },
+  {
+    name: "World's Greatest Stretch",
+    type: "reps",
+    reps: 5,
+    sides: ["Left side", "Right side"],
+    instructions: "Step into a lunge. Place same-side hand inside foot. Open your chest, rotating the top arm toward the ceiling. Return and repeat. Move slowly and controlled.",
+  },
+  {
+    name: "Cat-Cow",
+    type: "reps",
+    reps: 10,
+    sides: null,
+    instructions: "On all fours. Inhale — drop belly, lift head and tailbone (Cow). Exhale — round spine toward ceiling, tuck chin and pelvis (Cat). Flow with your breath.",
+  },
+  {
+    name: "Thoracic Rotation",
+    type: "reps",
+    reps: 8,
+    sides: ["Left side", "Right side"],
+    instructions: "Lie on your side, knees stacked at 90°. Keep hips still. Open top arm back toward the floor, rotating through your upper back. Return slowly.",
+  },
+  {
+    name: "Standing Hip Circles",
+    type: "reps",
+    reps: 10,
+    sides: ["Clockwise", "Counter-clockwise"],
+    instructions: "Stand with feet hip-width apart, hands on hips. Draw large circles with your hips. Keep knees soft. Make the circles as big and smooth as you can.",
+  },
+  {
+    name: "Doorway Chest Opener",
+    type: "timer",
+    duration: 30,
+    sets: 2,
+    sides: null,
+    instructions: "Stand in a doorway. Place forearms on the frame at 90°. Step one foot forward. Lean gently through the door until you feel a stretch across your chest. Keep shoulders down.",
+  },
+];
+
+// Expand sides into separate steps
+const QUEUE = [];
+STEPS.forEach(s => {
+  if (s.sides) {
+    s.sides.forEach((side, si) => {
+      if (s.type === "timer") {
+        QUEUE.push({ ...s, side, sideIndex: si });
+      } else {
+        QUEUE.push({ ...s, side, sideIndex: si });
+      }
+    });
+  } else {
+    const sets = s.sets || 1;
+    for (let i = 0; i < sets; i++) {
+      QUEUE.push({ ...s, side: sets > 1 ? `Set ${i+1} of ${sets}` : null, sideIndex: i });
+    }
+  }
+});
+
+const TOTAL = QUEUE.length;
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentIndex = 0;
+let timeLeft = 0;
+let timerInterval = null;
+let isPaused = false;
+let currentReps = 0;
+let sessionStart = null;
+
+// ── AUDIO ─────────────────────────────────────────────────────────────────────
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playDone() {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
+    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.7);
+  } catch (e) {}
+  if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
+}
+
+function playTick() {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.1);
+  } catch (e) {}
+}
+
+// ── UI HELPERS ────────────────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function updateDots() {
+  const container = document.getElementById('stepDots');
+  container.innerHTML = '';
+  QUEUE.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < currentIndex ? ' done' : i === currentIndex ? ' active' : '');
+    container.appendChild(d);
+  });
+}
+
+function updateProgress() {
+  const pct = (currentIndex / TOTAL) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+const CIRCUMFERENCE = 2 * Math.PI * 70; // 439.82
+
+function setRing(fraction) {
+  const offset = CIRCUMFERENCE * (1 - fraction);
+  document.getElementById('ringFill').style.strokeDashoffset = offset;
+}
+
+// ── SESSION LOGIC ─────────────────────────────────────────────────────────────
+function startSession() {
+  currentIndex = 0;
+  sessionStart = Date.now();
+  show('session');
+  renderStep();
+}
+
+function renderStep() {
+  clearInterval(timerInterval);
+  isPaused = false;
+
+  const step = QUEUE[currentIndex];
+  updateDots();
+  updateProgress();
+
+  document.getElementById('metaText').textContent = `Step ${currentIndex + 1} of ${TOTAL}`;
+  document.getElementById('stretchName').textContent = step.name;
+  document.getElementById('stretchSide').textContent = step.side || '';
+  document.getElementById('stretchInstructions').textContent = step.instructions;
+
+  // Animate content in
+  const content = document.getElementById('sessionContent');
+  content.classList.remove('fade-in');
+  void content.offsetWidth;
+  content.classList.add('fade-in');
+
+  document.getElementById('pauseBtn').textContent = '⏸';
+
+  if (step.type === 'timer') {
+    timeLeft = step.duration;
+    document.getElementById('timerContainer').style.display = 'flex';
+    document.getElementById('repContainer').style.display = 'none';
+    document.getElementById('mainBtn').textContent = 'Skip →';
+    setRing(1);
+    updateTimerDisplay();
+    startTimer(step.duration);
+  } else {
+    currentReps = 0;
+    document.getElementById('timerContainer').style.display = 'none';
+    document.getElementById('repContainer').style.display = 'flex';
+    document.getElementById('repCount').textContent = '0';
+    document.getElementById('repLabel').textContent = `of ${step.reps} reps`;
+    document.getElementById('mainBtn').textContent = 'Rep Done ✓';
+  }
+}
+
+function startTimer(total) {
+  timerInterval = setInterval(() => {
+    if (isPaused) return;
+    timeLeft--;
+    if (timeLeft <= 3 && timeLeft > 0) playTick();
+    updateTimerDisplay();
+    setRing(timeLeft / total);
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      playDone();
+      setTimeout(advance, 600);
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  document.getElementById('timerSeconds').textContent = timeLeft;
+}
+
+function handleMain() {
+  const step = QUEUE[currentIndex];
+  if (step.type === 'timer') {
+    advance();
+  } else {
+    currentReps++;
+    document.getElementById('repCount').textContent = currentReps;
+    if (currentReps >= step.reps) {
+      playDone();
+      setTimeout(advance, 400);
+    }
+  }
+}
+
+function advance() {
+  currentIndex++;
+  if (currentIndex >= TOTAL) {
+    finishSession();
+  } else {
+    renderStep();
+  }
+}
+
+function skipBack() {
+  if (currentIndex <= 0) { goHome(); return; }
+  currentIndex--;
+  renderStep();
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  document.getElementById('pauseBtn').textContent = isPaused ? '▶' : '⏸';
+}
+
+function finishSession() {
+  clearInterval(timerInterval);
+  const elapsed = Math.round((Date.now() - sessionStart) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  document.getElementById('completeTime').textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+  show('complete');
+}
+
+function goHome() {
+  clearInterval(timerInterval);
+  show('home');
+}
+
+// ── SERVICE WORKER ─────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
