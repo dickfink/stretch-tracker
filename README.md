@@ -36,7 +36,8 @@ git push -u origin main
 
 Then in your GitHub repo → **Settings → Pages → Source: main branch / root folder**.
 
-Your app will be live at `https://YOUR_USERNAME.github.io/morning-stretch/`
+Your app will be live at `https://YOUR_USERNAME.github.io/stretch-tracker/`
+e.g 'https://dickfink.github.io/stretch-tracker/`
 
 ### 3. Install on iPhone
 
