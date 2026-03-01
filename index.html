@@ -25,6 +25,8 @@
       --ring: #d4c4a8;
       --green: #3a6b4a;
     }
+
+```
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -235,7 +237,7 @@ body {
   margin-top: 4px;
 }
 
-/* Rep counter */
+/* Rep display */
 .rep-container {
   display: flex;
   flex-direction: column;
@@ -364,6 +366,7 @@ body {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+```
 
   </style>
 </head>
@@ -524,7 +527,6 @@ let currentIndex = 0;
 let timeLeft = 0;
 let timerInterval = null;
 let isPaused = false;
-let currentReps = 0;
 let sessionStart = null;
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
@@ -635,12 +637,11 @@ function renderStep() {
     updateTimerDisplay();
     startTimer(step.duration);
   } else {
-    currentReps = 0;
     document.getElementById('timerContainer').style.display = 'none';
     document.getElementById('repContainer').style.display = 'flex';
-    document.getElementById('repCount').textContent = '0';
-    document.getElementById('repLabel').textContent = `of ${step.reps} reps`;
-    document.getElementById('mainBtn').textContent = 'Rep Done ✓';
+    document.getElementById('repCount').textContent = step.reps;
+    document.getElementById('repLabel').textContent = 'reps';
+    document.getElementById('mainBtn').textContent = 'Next →';
   }
 }
 
@@ -664,17 +665,7 @@ function updateTimerDisplay() {
 }
 
 function handleMain() {
-  const step = QUEUE[currentIndex];
-  if (step.type === 'timer') {
-    advance();
-  } else {
-    currentReps++;
-    document.getElementById('repCount').textContent = currentReps;
-    if (currentReps >= step.reps) {
-      playDone();
-      setTimeout(advance, 400);
-    }
-  }
+  advance();
 }
 
 function advance() {
