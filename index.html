@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -155,6 +154,7 @@ body {
   flex-direction: column;
   justify-content: center;
   padding: 32px 32px 24px;
+  position: relative;
 }
 
 .stretch-meta {
@@ -256,6 +256,70 @@ body {
   text-transform: uppercase;
   color: var(--ink-soft);
   margin-top: 6px;
+}
+
+/* Breath display */
+.breath-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.breath-orb-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.breath-orb {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--accent-light), var(--accent));
+  opacity: 0.85;
+  transition: transform 0.9s ease-in-out, opacity 0.9s ease-in-out;
+}
+.breath-orb.exhale {
+  transform: scale(0.72);
+  opacity: 0.5;
+}
+.breath-orb.inhale {
+  transform: scale(1.0);
+  opacity: 0.85;
+}
+.breath-label-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.breath-count-display {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+.breath-phase {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  margin-top: 4px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.breath-total-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 12px;
 }
 
 /* Buttons */
@@ -454,6 +518,34 @@ body {
   text-align: left;
 }
 
+/* Tap to start overlay */
+.tap-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(245, 240, 232, 0.72);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.2s;
+}
+.tap-overlay.hidden { display: none; }
+.tap-overlay-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+.tap-overlay-text {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
 /* Fade transition */
 .fade-in {
   animation: fadeIn 0.4s ease both;
@@ -462,36 +554,35 @@ body {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
   </style>
 </head>
 <body>
 
 <!-- HOME -->
-
 <section id="home" class="screen active">
   <div class="home-header">
     <p class="home-eyebrow">Daily Practice</p>
     <h1 class="home-title">Morning<br><em>Stretch</em></h1>
   </div>
   <ul class="routine-list">
-    <li><span class="num">01</span><span class="name">90/90 Hip Stretch</span><span class="detail">60s × 2</span></li>
-    <li><span class="num">02</span><span class="name">World's Greatest Stretch</span><span class="detail">5 reps × 2</span></li>
-    <li><span class="num">03</span><span class="name">Cat-Cow</span><span class="detail">10 reps</span></li>
-    <li><span class="num">04</span><span class="name">Thoracic Rotation</span><span class="detail">8 reps × 2</span></li>
-    <li><span class="num">05</span><span class="name">Standing Hip Circles</span><span class="detail">10 × 2 dir</span></li>
-    <li><span class="num">06</span><span class="name">Doorway Chest Opener</span><span class="detail">30s × 2</span></li>
+    <li><span class="num">01</span><span class="name">Low Lunge</span><span class="detail">5 breaths × 2</span></li>
+    <li><span class="num">02</span><span class="name">Pigeon Pose</span><span class="detail">5 breaths × 2</span></li>
+    <li><span class="num">03</span><span class="name">Figure-Four Hip Stretch</span><span class="detail">5 breaths × 2</span></li>
+    <li><span class="num">04</span><span class="name">Butterfly Stretch</span><span class="detail">5 breaths</span></li>
+    <li><span class="num">05</span><span class="name">Cat-Cow</span><span class="detail">10 reps</span></li>
+    <li><span class="num">06</span><span class="name">Thread the Needle</span><span class="detail">8 reps × 2</span></li>
+    <li><span class="num">07</span><span class="name">Doorway Chest Stretch</span><span class="detail">5 breaths</span></li>
+    <li><span class="num">08</span><span class="name">Clasped Hands Behind Back</span><span class="detail">8 reps</span></li>
+    <li><span class="num">09</span><span class="name">Wall Pec Stretch</span><span class="detail">5 breaths × 2</span></li>
   </ul>
 
   <div id="homeStreakRow" class="home-streak"></div>
   <div id="homeHistoryDots" class="home-history-dots"></div>
 
-<button class="start-btn" onclick="startSession()">Begin Routine →</button>
-
+  <button class="start-btn" onclick="startSession()">Begin Routine →</button>
 </section>
 
 <!-- SESSION -->
-
 <section id="session" class="screen">
   <div class="progress-bar-track">
     <div class="progress-bar-fill" id="progressFill"></div>
@@ -499,34 +590,50 @@ body {
 
   <div class="step-dots" id="stepDots"></div>
 
-  <div class="session-content fade-in" id="sessionContent">
+  <div class="session-content fade-in" id="sessionContent" onclick="handleContentTap(event)">
+    <!-- Tap to start overlay (shown for timed/breath steps) -->
+    <div class="tap-overlay hidden" id="tapOverlay">
+      <div class="tap-overlay-icon">▶</div>
+      <div class="tap-overlay-text">Tap to start</div>
+    </div>
     <p class="stretch-meta" id="metaText"></p>
     <h2 class="stretch-name" id="stretchName"></h2>
     <p class="stretch-side" id="stretchSide"></p>
     <p class="stretch-instructions" id="stretchInstructions"></p>
 
-<!-- Timer (timed) -->
-<div class="timer-container" id="timerContainer">
-  <div class="timer-ring-wrap">
-    <svg width="160" height="160" viewBox="0 0 160 160">
-      <circle class="ring-bg" cx="80" cy="80" r="70" stroke-width="6"/>
-      <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="70" stroke-width="6"
-        stroke-dasharray="439.82"
-        stroke-dashoffset="0"/>
-    </svg>
-    <div class="timer-label">
-      <span class="timer-seconds" id="timerSeconds">60</span>
-      <span class="timer-unit">sec</span>
+    <!-- Timer (timed) -->
+    <div class="timer-container" id="timerContainer">
+      <div class="timer-ring-wrap">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle class="ring-bg" cx="80" cy="80" r="70" stroke-width="6"/>
+          <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="70" stroke-width="6"
+            stroke-dasharray="439.82"
+            stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-label">
+          <span class="timer-seconds" id="timerSeconds">60</span>
+          <span class="timer-unit">sec</span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<!-- Rep counter (rep-based) -->
-<div class="rep-container" id="repContainer" style="display:none">
-  <span class="rep-count" id="repCount">0</span>
-  <span class="rep-label" id="repLabel">of 10 reps</span>
-</div>
+    <!-- Rep counter (rep-based) -->
+    <div class="rep-container" id="repContainer" style="display:none">
+      <span class="rep-count" id="repCount">0</span>
+      <span class="rep-label" id="repLabel">of 10 reps</span>
+    </div>
 
+    <!-- Breath counter -->
+    <div class="breath-container" id="breathContainer" style="display:none">
+      <div class="breath-orb-wrap">
+        <div class="breath-orb inhale" id="breathOrb"></div>
+        <div class="breath-label-wrap">
+          <span class="breath-count-display" id="breathCountDisplay">1</span>
+          <span class="breath-phase" id="breathPhase">inhale</span>
+        </div>
+      </div>
+      <span class="breath-total-label" id="breathTotalLabel">of 5 breaths</span>
+    </div>
   </div>
 
   <div class="btn-row" id="btnRow">
@@ -537,7 +644,6 @@ body {
 </section>
 
 <!-- COMPLETE -->
-
 <section id="complete" class="screen">
   <div class="complete-icon">🌿</div>
   <div>
@@ -564,47 +670,67 @@ body {
 // ── STRETCH DATA ──────────────────────────────────────────────────────────────
 const STEPS = [
   {
-    name: "90/90 Hip Stretch",
-    type: "timer",
-    duration: 60,
+    name: "Low Lunge",
+    type: "breaths",
+    breaths: 5,
     sides: ["Left side", "Right side"],
-    instructions: "Sit with front leg at 90° and back leg at 90°. Keep your spine tall. Let gravity sink your hips toward the floor. Breathe slowly and relax into the position.",
+    instructions: "Step one foot forward into a lunge, drop the back knee to the floor. Sink your hips forward and down. Keep your torso upright. This directly counters the shortened hip flexors from sitting.",
   },
   {
-    name: "World's Greatest Stretch",
-    type: "reps",
-    reps: 5,
+    name: "Pigeon Pose",
+    type: "breaths",
+    breaths: 5,
     sides: ["Left side", "Right side"],
-    instructions: "Step into a lunge. Place same-side hand inside foot. Open your chest, rotating the top arm toward the ceiling. Return and repeat. Move slowly and controlled.",
+    instructions: "From all fours, bring one knee forward toward your wrist and extend the other leg back. Sink your hips toward the floor. This is the gold standard for deep hip opening — breathe and relax into it.",
+  },
+  {
+    name: "Figure-Four Hip Stretch",
+    type: "breaths",
+    breaths: 5,
+    sides: ["Left side", "Right side"],
+    instructions: "Lie on your back. Cross one ankle over the opposite knee. Gently pull both legs toward your chest. Targets the piriformis and outer hip — often very tight from prolonged sitting.",
+  },
+  {
+    name: "Butterfly Stretch",
+    type: "breaths",
+    breaths: 5,
+    sides: null,
+    instructions: "Sit with the soles of your feet together, knees falling out to the sides. Lean gently forward from your hips, keeping your spine long. Opens the inner hips and groin.",
   },
   {
     name: "Cat-Cow",
     type: "reps",
     reps: 10,
     sides: null,
-    instructions: "On all fours. Inhale — drop belly, lift head and tailbone (Cow). Exhale — round spine toward ceiling, tuck chin and pelvis (Cat). Flow with your breath.",
+    instructions: "On all fours. Inhale — drop belly, lift head and tailbone (Cow). Exhale — round spine toward ceiling, tuck chin and pelvis (Cat). Flow slowly with your breath.",
   },
   {
-    name: "Thoracic Rotation",
+    name: "Thread the Needle",
     type: "reps",
     reps: 8,
     sides: ["Left side", "Right side"],
-    instructions: "Lie on your side, knees stacked at 90°. Keep hips still. Open top arm back toward the floor, rotating through your upper back. Return slowly.",
+    instructions: "On hands and knees. Slide one arm under your body along the floor, rotating through your upper back. Slowly return and repeat. Releases the mid-back and shoulder simultaneously.",
   },
   {
-    name: "Standing Hip Circles",
-    type: "reps",
-    reps: 10,
-    sides: ["Clockwise", "Counter-clockwise"],
-    instructions: "Stand with feet hip-width apart, hands on hips. Draw large circles with your hips. Keep knees soft. Make the circles as big and smooth as you can.",
-  },
-  {
-    name: "Doorway Chest Opener",
-    type: "timer",
-    duration: 30,
-    sets: 2,
+    name: "Doorway Chest Stretch",
+    type: "breaths",
+    breaths: 5,
     sides: null,
-    instructions: "Stand in a doorway. Place forearms on the frame at 90°. Step one foot forward. Lean gently through the door until you feel a stretch across your chest. Keep shoulders down.",
+    instructions: "Stand in a doorway. Place forearms on the frame at 90°. Step one foot forward and lean gently through the door. Directly counters the forward-hunched posture from screen time.",
+  },
+  {
+    name: "Clasped Hands Behind Back",
+    type: "reps",
+    reps: 8,
+    sides: null,
+    instructions: "Stand tall. Interlace fingers behind your back, squeeze shoulder blades together and lift hands slightly away from your body. Hold 2–3 seconds each rep. Opens the front of the shoulders and chest.",
+  },
+  {
+    name: "Wall Pec Stretch",
+    type: "breaths",
+    breaths: 5,
+    sides: ["Left side", "Right side"],
+    instructions: "Place one hand on a wall at shoulder height. Rotate your body away from the wall until you feel a stretch across your chest and front shoulder. Try three angles: low, mid, and high.",
   },
 ];
 
@@ -613,11 +739,7 @@ const QUEUE = [];
 STEPS.forEach(s => {
   if (s.sides) {
     s.sides.forEach((side, si) => {
-      if (s.type === "timer") {
-        QUEUE.push({ ...s, side, sideIndex: si });
-      } else {
-        QUEUE.push({ ...s, side, sideIndex: si });
-      }
+      QUEUE.push({ ...s, side, sideIndex: si });
     });
   } else {
     const sets = s.sets || 1;
@@ -635,6 +757,16 @@ let timeLeft = 0;
 let timerInterval = null;
 let isPaused = false;
 let sessionStart = null;
+
+// Breath state
+let breathCurrent = 0;
+let breathTotal = 0;
+let breathPhase = 'inhale'; // 'inhale' | 'exhale'
+let breathInterval = null;
+const INHALE_SEC = 4;
+const EXHALE_SEC = 6;
+let breathPhaseLeft = 0;
+let waitingForTap = false; // true when timed/breath step is paused waiting for tap
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
 let audioCtx = null;
@@ -678,6 +810,22 @@ function playTick() {
   } catch (e) {}
 }
 
+function playBreathCue(isInhale) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = isInhale ? 440 : 330;
+    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+  } catch (e) {}
+}
+
 // ── UI HELPERS ────────────────────────────────────────────────────────────────
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -699,7 +847,7 @@ function updateProgress() {
   document.getElementById('progressFill').style.width = pct + '%';
 }
 
-const CIRCUMFERENCE = 2 * Math.PI * 70; // 439.82
+const CIRCUMFERENCE = 2 * Math.PI * 70;
 
 function setRing(fraction) {
   const offset = CIRCUMFERENCE * (1 - fraction);
@@ -722,7 +870,6 @@ function recordToday() {
   const history = getHistory();
   if (!history.includes(key)) {
     history.push(key);
-    // Keep only last 30 unique days
     history.sort();
     if (history.length > 30) history.splice(0, history.length - 30);
     localStorage.setItem('stretch-history', JSON.stringify(history));
@@ -731,15 +878,10 @@ function recordToday() {
 
 function calcStreak(history) {
   if (!history.length) return 0;
-  const sorted = [...history].sort().reverse(); // newest first
   const today = todayKey();
-  // Accept streak ending today or yesterday (grace period)
-  const todayDate = new Date();
   let streak = 0;
   let cursor = new Date();
-  // Start from today; if today not done yet, start from yesterday
   if (!history.includes(today)) cursor.setDate(cursor.getDate() - 1);
-
   while (true) {
     const key = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
     if (history.includes(key)) {
@@ -788,6 +930,60 @@ function renderHomeStreak() {
   renderHistoryDots('homeHistoryDots', 'home-history-dot');
 }
 
+// ── BREATH LOGIC ──────────────────────────────────────────────────────────────
+function startBreaths(total) {
+  breathTotal = total;
+  breathCurrent = 1;
+  breathPhase = 'inhale';
+  breathPhaseLeft = INHALE_SEC;
+  updateBreathDisplay();
+  playBreathCue(true);
+
+  breathInterval = setInterval(() => {
+    if (isPaused) return;
+    breathPhaseLeft--;
+
+    if (breathPhaseLeft <= 0) {
+      if (breathPhase === 'inhale') {
+        // Switch to exhale
+        breathPhase = 'exhale';
+        breathPhaseLeft = EXHALE_SEC;
+        playBreathCue(false);
+      } else {
+        // Exhale done — count one breath
+        if (breathCurrent >= breathTotal) {
+          // All breaths done
+          clearInterval(breathInterval);
+          playDone();
+          setTimeout(advance, 600);
+          return;
+        }
+        breathCurrent++;
+        breathPhase = 'inhale';
+        breathPhaseLeft = INHALE_SEC;
+        playBreathCue(true);
+      }
+    }
+    updateBreathDisplay();
+  }, 1000);
+}
+
+function updateBreathDisplay() {
+  document.getElementById('breathCountDisplay').textContent = breathCurrent;
+  document.getElementById('breathTotalLabel').textContent = `of ${breathTotal} breaths`;
+
+  const orb = document.getElementById('breathOrb');
+  const phaseEl = document.getElementById('breathPhase');
+
+  if (breathPhase === 'inhale') {
+    orb.className = 'breath-orb inhale';
+    phaseEl.textContent = 'inhale';
+  } else {
+    orb.className = 'breath-orb exhale';
+    phaseEl.textContent = 'exhale';
+  }
+}
+
 // ── SESSION LOGIC ─────────────────────────────────────────────────────────────
 function startSession() {
   currentIndex = 0;
@@ -796,8 +992,15 @@ function startSession() {
   renderStep();
 }
 
-function renderStep() {
+function clearAllTimers() {
   clearInterval(timerInterval);
+  clearInterval(breathInterval);
+  timerInterval = null;
+  breathInterval = null;
+}
+
+function renderStep() {
+  clearAllTimers();
   isPaused = false;
 
   const step = QUEUE[currentIndex];
@@ -809,7 +1012,6 @@ function renderStep() {
   document.getElementById('stretchSide').textContent = step.side || '';
   document.getElementById('stretchInstructions').textContent = step.instructions;
 
-  // Animate content in
   const content = document.getElementById('sessionContent');
   content.classList.remove('fade-in');
   void content.offsetWidth;
@@ -817,22 +1019,81 @@ function renderStep() {
 
   document.getElementById('pauseBtn').textContent = '⏸';
 
+  // Hide all counters first
+  document.getElementById('timerContainer').style.display = 'none';
+  document.getElementById('repContainer').style.display = 'none';
+  document.getElementById('breathContainer').style.display = 'none';
+
   if (step.type === 'timer') {
     timeLeft = step.duration;
     document.getElementById('timerContainer').style.display = 'flex';
-    document.getElementById('repContainer').style.display = 'none';
     document.getElementById('mainBtn').textContent = 'Skip →';
     setRing(1);
     updateTimerDisplay();
-    startTimer(step.duration);
-  } else {
-    document.getElementById('timerContainer').style.display = 'none';
+    showTapOverlay(true);
+    // Don't start timer yet — wait for tap
+  } else if (step.type === 'reps') {
     document.getElementById('repContainer').style.display = 'flex';
     document.getElementById('repCount').textContent = step.reps;
     document.getElementById('repLabel').textContent = 'reps';
     document.getElementById('mainBtn').textContent = 'Next →';
+    showTapOverlay(false);
+  } else if (step.type === 'breaths') {
+    document.getElementById('breathContainer').style.display = 'flex';
+    document.getElementById('mainBtn').textContent = 'Skip →';
+    // Pre-fill display but don't start yet
+    breathTotal = step.breaths;
+    breathCurrent = 1;
+    breathPhase = 'inhale';
+    breathPhaseLeft = INHALE_SEC;
+    updateBreathDisplay();
+    showTapOverlay(true);
   }
 }
+
+function showTapOverlay(show) {
+  waitingForTap = show;
+  const overlay = document.getElementById('tapOverlay');
+  if (show) {
+    overlay.classList.remove('hidden');
+  } else {
+    overlay.classList.add('hidden');
+  }
+}
+
+function handleContentTap(e) {
+  // Ignore taps on buttons
+  if (e.target.closest('button')) return;
+
+  if (waitingForTap === 'resume') {
+    // Resuming from pause
+    isPaused = false;
+    waitingForTap = false;
+    document.getElementById('breathOrb').style.transition = '';
+    document.getElementById('tapOverlay').classList.add('hidden');
+    document.getElementById('pauseBtn').textContent = '⏸';
+    return;
+  }
+
+  if (!waitingForTap) {
+    // Running — tap to pause (timed/breath only)
+    const step = QUEUE[currentIndex];
+    if (step && step.type !== 'reps') {
+      togglePause();
+    }
+    return;
+  }
+
+  // First tap — start the countdown
+  showTapOverlay(false);
+  const step = QUEUE[currentIndex];
+  if (step.type === 'timer') {
+    startTimer(step.duration);
+  } else if (step.type === 'breaths') {
+    startBreaths(step.breaths);
+  }
+}
+
 
 function startTimer(total) {
   timerInterval = setInterval(() => {
@@ -873,12 +1134,29 @@ function skipBack() {
 }
 
 function togglePause() {
+  const step = QUEUE[currentIndex];
+  if (step && step.type === 'reps') return; // no pause for reps
   isPaused = !isPaused;
   document.getElementById('pauseBtn').textContent = isPaused ? '▶' : '⏸';
+  if (isPaused) {
+    document.getElementById('breathOrb').style.transition = 'none';
+    // Show overlay with resume prompt
+    const overlay = document.getElementById('tapOverlay');
+    overlay.querySelector('.tap-overlay-icon').textContent = '▶';
+    overlay.querySelector('.tap-overlay-text').textContent = 'Tap to resume';
+    waitingForTap = false; // already running, this is a resume
+    overlay.classList.remove('hidden');
+    // Override tap to unpause
+    waitingForTap = 'resume';
+  } else {
+    document.getElementById('breathOrb').style.transition = '';
+    document.getElementById('tapOverlay').classList.add('hidden');
+    document.getElementById('pauseBtn').textContent = '⏸';
+  }
 }
 
 function finishSession() {
-  clearInterval(timerInterval);
+  clearAllTimers();
   recordToday();
   const history = getHistory();
   const streak = calcStreak(history);
@@ -893,7 +1171,7 @@ function finishSession() {
 }
 
 function goHome() {
-  clearInterval(timerInterval);
+  clearAllTimers();
   renderHomeStreak();
   show('home');
 }
@@ -905,9 +1183,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Init home streak on first load
 renderHomeStreak();
 </script>
-
 </body>
 </html>
